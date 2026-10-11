@@ -41,8 +41,11 @@ export let pieceSources = {};
 import { spellToSnbt } from 'psi-spell-encode-wasm-v3';
 const builtinSources = ['psi'].reduce((obj, list) => (obj[list] = 'pieces/' + list + '.html', obj), {});
 const addonSources = { ...builtinSources, ...['phi'].reduce((obj, list) => (obj[list] = 'pieces/' + list + '.html', obj), {}) };
-const loads = Promise.all([init2(wasmUrl2), init3(wasmUrl3), ...Object.values(builtinSources)
-	.map(url => addPieceSource(url, true))]);
+const loads = Promise.all([
+	(typeof window !== 'undefined' && window.__WASM_BYTES_2__) ? init2(window.__WASM_BYTES_2__) : init2(wasmUrl2),
+	(typeof window !== 'undefined' && window.__WASM_BYTES_3__) ? init3({ module_or_path: window.__WASM_BYTES_3__ }) : init3(wasmUrl3),
+	...Object.values(builtinSources).map(url => addPieceSource(url, true))
+]);
 
 {
 	let list = document.createElement('datalist');

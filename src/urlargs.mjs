@@ -42,24 +42,36 @@ export async function parseURLArgs(builtinLoads = Promise.resolve()) {
 }
 
 export function updateURLArgs(imported = false) {
-	if (cells.some(col => col.some(cell => cell.piece))) {
-		let args = new URLSearchParams();
-		if (!imported) args.set('cursor', `${selected.x + 1}-${selected.y + 1}`);
-		args.set('spell', '2-' + spellToUrlSafe3(exportGrid(cells)));
-		history.replaceState({}, '', `${location.pathname}?${args}`);
-	} else {
-		history.replaceState({}, '', location.pathname);
+	try {
+		if (cells.some(col => col.some(cell => cell.piece))) {
+			let args = new URLSearchParams();
+			if (!imported) args.set('cursor', `${selected.x + 1}-${selected.y + 1}`);
+			args.set('spell', '2-' + spellToUrlSafe3(exportGrid(cells)));
+			history.replaceState({}, '', `${location.pathname}?${args}`);
+		} else {
+			history.replaceState({}, '', location.pathname);
+		}
+	} catch (e) {
+		console.warn('URL args update skipped (file:// restriction):', e);
 	}
 }
 
 export function addAddonArg(url) {
-	let args = new URLSearchParams(location.search);
-	args.append('addon', url);
-	history.replaceState({}, '', `${location.pathname}?${args}`);
+	try {
+		let args = new URLSearchParams(location.search);
+		args.append('addon', url);
+		history.replaceState({}, '', `${location.pathname}?${args}`);
+	} catch (e) {
+		console.warn('Addon URL arg update skipped:', e);
+	}
 }
 
 export function removeAddonArg(url) {
-	let args = new URLSearchParams(location.search);
-	args.delete('addon', url);
-	history.replaceState({}, '', `${location.pathname}?${args}`);
+	try {
+		let args = new URLSearchParams(location.search);
+		args.delete('addon', url);
+		history.replaceState({}, '', `${location.pathname}?${args}`);
+	} catch (e) {
+		console.warn('Remove addon URL arg update skipped:', e);
+	}
 }

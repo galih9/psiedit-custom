@@ -187,16 +187,29 @@ export async function loadPieces(html) {
 		resourcePath = 'src/main/resources';
 	}
 	html.querySelectorAll('[data-icon]').forEach(e => {
-		e.style.setProperty('--icon', `url('https://raw.githubusercontent.com/${repo}/${branch}/${resourcePath}/assets/${namespace}/textures/spell/${e.dataset.icon}.png')`);
+		const offlineIcon = typeof window !== 'undefined' && window.__OFFLINE_TEXTURES__?.[`${namespace}:${e.dataset.icon}`];
+		if (offlineIcon) {
+			e.style.setProperty('--icon', `url('${offlineIcon}')`);
+		} else {
+			e.style.setProperty('--icon', `url('https://raw.githubusercontent.com/${repo}/${branch}/${resourcePath}/assets/${namespace}/textures/spell/${e.dataset.icon}.png')`);
+		}
 	});
 	try {
-		lang = await loadJSON(`https://raw.githubusercontent.com/${repo}/${branch}/${resourcePath}/assets/${namespace}/lang/en_us.json`);
+		const offlineLang = typeof window !== 'undefined' && window.__OFFLINE_LANG__?.[namespace];
+		if (offlineLang) {
+			lang = offlineLang;
+		} else {
+			lang = await loadJSON(`https://raw.githubusercontent.com/${repo}/${branch}/${resourcePath}/assets/${namespace}/lang/en_us.json`);
+		}
 	} catch {
 		console.error(`Failed to load language file for ${namespace}`);
 	}
 	lang = lang || {};
 	html.querySelectorAll('.piece').forEach(e => {
-		if (repo && namespace) {
+		const offlineIcon = typeof window !== 'undefined' && window.__OFFLINE_TEXTURES__?.[`${namespace}:${e.dataset.icon || e.dataset.type}`];
+		if (offlineIcon) {
+			e.style.setProperty('--piece-icon', `url('${offlineIcon}')`);
+		} else if (repo && namespace) {
 			e.style.setProperty('--piece-icon', `url('https://raw.githubusercontent.com/${repo}/${branch}/${resourcePath}/assets/${namespace}/textures/spell/${e.dataset.icon || e.dataset.type}.png')`);
 		}
 		e.dataset.name = e.dataset.name || lang[`${namespace}.spellpiece.${e.dataset.type}`] || `${namespace}.spellpiece.${e.dataset.type}`;

@@ -16,11 +16,21 @@ elemFn('button');
 elemFn('i');
 
 export async function loadHTML(url) {
+	if (typeof window !== 'undefined' && window.__EMBEDDED_HTML__) {
+		const cleanKey = url.replace(/.*(?:pieces\/|\/)/, (m) => m.includes('pieces') ? 'pieces/' : '');
+		const content = window.__EMBEDDED_HTML__[url] || window.__EMBEDDED_HTML__[cleanKey];
+		if (content) {
+			return new DOMParser().parseFromString(content, 'text/html');
+		}
+	}
 	let text = await fetch(url).then(r => r.text());
 	return new DOMParser().parseFromString(text, 'text/html');
 }
 
 export async function loadJSON(url) {
+	if (typeof window !== 'undefined' && window.__EMBEDDED_JSON__ && window.__EMBEDDED_JSON__[url]) {
+		return window.__EMBEDDED_JSON__[url];
+	}
 	return fetch(url).then(r => r.json());
 }
 
